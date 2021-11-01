@@ -12,8 +12,21 @@ import com.google.gson.GsonBuilder;
 import product.StoreProduct;
 
 public class StoreProductSerializer implements ProductSerializer {
+    private String filename;
+    public StoreProductSerializer(String filename) {
+        this.filename = filename;
+    }
+
+    public String getFilename() {
+        return filename;
+    }
+
+    public void setFilename(String filename) {
+        this.filename = filename;
+    }
+
     public void serialize(List<Product> products) {
-        try (FileWriter writer = new FileWriter("products.json"))
+        try (FileWriter writer = new FileWriter(filename))
         {
             Gson gson = new GsonBuilder().setPrettyPrinting().create();
             String json = gson.toJson(products);
@@ -28,7 +41,7 @@ public class StoreProductSerializer implements ProductSerializer {
 
     public List<Product> deserialize() {
         List<Product> products = new ArrayList<Product>();
-        try (BufferedReader reader = new BufferedReader(new FileReader("products.json"));)
+        try (BufferedReader reader = new BufferedReader(new FileReader(filename));)
         {
             StringBuilder fileText = new StringBuilder();
             String line;

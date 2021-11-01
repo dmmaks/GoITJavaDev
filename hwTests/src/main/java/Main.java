@@ -19,6 +19,6 @@ public class Main {
 //        products.add(p3);
 //        products.add(p4);
 //        ser.serialize(products);
-        System.out.println(new StoreProductParser(new StoreProductPriceCounter(), new StoreProductSerializer()).calculateTotalCost("ABCDABACCCCC"));
+        System.out.println(new StoreProductParser(new StoreProductPriceCounter(), new StoreProductSerializer("products.json")).calculateTotalCost("ABCDABACCCCC"));
     }
 }

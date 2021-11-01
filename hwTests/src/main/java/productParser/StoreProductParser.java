@@ -10,10 +10,10 @@ import java.util.Map;
 public class StoreProductParser  implements ProductParser{
 
     private ProductPriceCounter counter;
-    private ProductSerializer serialzer;
-    public StoreProductParser(ProductPriceCounter counter, ProductSerializer serialzer) {
+    private ProductSerializer serializer;
+    public StoreProductParser(ProductPriceCounter counter, ProductSerializer serializer) {
         this.counter = counter;
-        this.serialzer = serialzer;
+        this.serializer = serializer;
     }
     public Double calculateTotalCost(String productString) {
         productString = productString.trim();
@@ -33,6 +33,6 @@ public class StoreProductParser  implements ProductParser{
                 map.put(str, 1);
             }
         }
-        return counter.count(serialzer.deserialize(), map);
+        return counter.count(serializer.deserialize(), map);
     }
 }

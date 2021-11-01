@@ -10,20 +10,24 @@ public class StoreProductPriceCounter implements ProductPriceCounter{
         double totalPrice = 0;
         for (Product product : priceData) {
             double price = product.getPrice();
-            System.out.println("price " + price);
+            if (product.getCode().length() == 0) {
+                return 0;
+            }
             Integer quantity = quantityMap.get(product.getCode());
-            System.out.println("quantity " + quantity);
+            if (price <= 0 || quantity == null || quantity <= 0) {
+                return 0;
+            }
             if (quantity != null) {
                 if (product.getDiscountQuantity() != null && product.getDiscountPrice() != null) {
-
-                    System.out.println("test1 " + Math.floor(quantity/product.getDiscountQuantity()) );
+                    if (product.getDiscountQuantity() <= 0 || product.getDiscountPrice() <= 0) {
+                        return 0;
+                    }
                     totalPrice += Math.floor(quantity/product.getDiscountQuantity()) * product.getDiscountPrice() + quantity % product.getDiscountQuantity() * price;
                 }
                 else {
                     totalPrice += quantity * price;
                 }
             }
-            System.out.println("tot price " + totalPrice);
         }
         return totalPrice;
     }
