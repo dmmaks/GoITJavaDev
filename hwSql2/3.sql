@@ -1,0 +1,2 @@
+SELECT SUM(salary), skills.area FROM developers INNER JOIN developers_skills ON developers.id = developers_skills.dev_id
+INNER JOIN skills ON skills.id = developers_skills.skill_id GROUP BY skills.area HAVING area = 'Java'
