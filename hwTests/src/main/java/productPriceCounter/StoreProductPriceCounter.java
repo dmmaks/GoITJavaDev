@@ -14,10 +14,13 @@ public class StoreProductPriceCounter implements ProductPriceCounter{
                 return 0;
             }
             Integer quantity = quantityMap.get(product.getCode());
-            if (price <= 0 || quantity == null || quantity <= 0) {
+            if (price <= 0) {
                 return 0;
             }
             if (quantity != null) {
+                if (quantity <= 0) {
+                    return 0;
+                }
                 if (product.getDiscountQuantity() != null && product.getDiscountPrice() != null) {
                     if (product.getDiscountQuantity() <= 0 || product.getDiscountPrice() <= 0) {
                         return 0;
