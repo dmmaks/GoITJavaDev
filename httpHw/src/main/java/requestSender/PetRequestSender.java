@@ -21,32 +21,63 @@ public class PetRequestSender extends RequestSender {
     }
 
     public void update(Pet pet, Method method) {
-        String json = toJson(pet);
+        if (!method.toString().equals("POST") && !method.toString().equals("PUT")) {
+            System.out.println("Wrong method supplied.");
+            return;
+        }
+        sendUpdatingRequest(getBaseUrl(), method, pet);
+    }
+
+    public String getByStatus(Collection<PetStatus> statuses) {
+        String urlStr = getBaseUrl() + "findByStatus?status=";
+        for (PetStatus status : statuses) {
+            if (!urlStr.endsWith("=")) {
+                urlStr += ",";
+            }
+            urlStr += status;
+        }
+        return sendBasicRequest(urlStr, Method.GET);
+    }
+
+    public String getByTags(Collection<String> tags) {
+        String urlStr = getBaseUrl() + "findByTags?tags=";
+        for (String tag : tags) {
+            if (!urlStr.endsWith("=")) {
+                urlStr += ",";
+            }
+            urlStr += tag;
+        }
+        return sendBasicRequest(urlStr, Method.GET);
+    }
+
+    public String getById(long id) {
+        String urlStr = getBaseUrl() + id;
+        return sendBasicRequest(urlStr, Method.GET);
+    }
+
+    public void delete(long id) {
+        String urlStr = getBaseUrl() + id;
+        sendBasicRequest(urlStr, Method.DELETE);
+    }
+
+    public void updateWithFormData(long id, String name, PetStatus status) {
         int responseCode = 0;
         try {
-            URL url = new URL(getBaseUrl());
+            HttpEntity multipartEntity = org.apache.http.entity.mime.MultipartEntityBuilder.create()
+                    .addPart("name", new StringBody(name, ContentType.TEXT_PLAIN))
+                    .addPart("status", new StringBody(status.toString(), ContentType.TEXT_PLAIN))
+                    .build();
+
+            URL url = new URL(getBaseUrl() + id);
             HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            if (method == Method.POST) {
-                connection.setRequestMethod("POST");
-            } else {
-                connection.setRequestMethod("PUT");
-            }
+            connection.setRequestMethod("POST");
             connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "application/json");
+            connection.setRequestProperty("Content-Type", "multipart/form-data");
             OutputStream os = connection.getOutputStream();
-            os.write(json.getBytes());
+            multipartEntity.writeTo(os);
             os.flush();
             os.close();
-
-            responseCode = connection.getResponseCode();
-            System.out.println("Response code: " + responseCode);
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                System.out.println("Response:");
-                String response = this.getResponse(connection);
-                System.out.println(response);
-            } else {
-                System.out.println("Got error " + responseCode);
-            }
+            outputResponse(connection);
         } catch (IOException e) {
             System.out.println("I/O Exception occurred.");
             return;
@@ -90,150 +121,12 @@ public class PetRequestSender extends RequestSender {
             conn_out_writer.close();
             conn_out.close();
             file_stream.close();
-            int responseCode = connection.getResponseCode();
-            System.out.println("Response code: " + responseCode);
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                System.out.println("Response:");
-                String response = this.getResponse(connection);
-                System.out.println(response);
-            } else {
-                System.out.println("Got error " + responseCode);
-            }
+            outputResponse(connection);
 
         } catch (IOException e) {
             System.out.println("I/O Exception occurred.");
             return;
         }
 
-    }
-
-    public String getByStatus(Collection<PetStatus> statuses) {
-        String urlStr = getBaseUrl() + "findByStatus?status=";
-        for (PetStatus status : statuses) {
-            if (!urlStr.endsWith("=")) {
-                urlStr += ",";
-            }
-            urlStr += status;
-        }
-        try {
-            URL url = new URL(urlStr);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            int responseCode = connection.getResponseCode();
-            System.out.println("Response code: " + responseCode);
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                System.out.println("Response:");
-                String response = this.getResponse(connection);
-                System.out.println(response);
-                return response;
-            } else {
-                System.out.println("Got error " + responseCode);
-            }
-        } catch (IOException e) {
-            System.out.println("I/O Exception occurred.");
-        }
-        return null;
-    }
-
-    public String getByTags(Collection<String> tags) {
-        String urlStr = getBaseUrl() + "findByTags?tags=";
-        for (String tag : tags) {
-            if (!urlStr.endsWith("=")) {
-                urlStr += ",";
-            }
-            urlStr += tag;
-        }
-        try {
-            URL url = new URL(urlStr);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            int responseCode = connection.getResponseCode();
-            System.out.println("Response code: " + responseCode);
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                System.out.println("Response:");
-                String response = this.getResponse(connection);
-                System.out.println(response);
-                return response;
-            } else {
-                System.out.println("Got error " + responseCode);
-            }
-        } catch (IOException e) {
-            System.out.println("I/O Exception occurred.");
-        }
-        return null;
-    }
-
-    public String getById(long id) {
-        String urlStr = getBaseUrl() + id;
-        try {
-            URL url = new URL(urlStr);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
-            int responseCode = connection.getResponseCode();
-            System.out.println("Response code: " + responseCode);
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                System.out.println("Response:");
-                String response = this.getResponse(connection);
-                System.out.println(response);
-                return response;
-            } else {
-                System.out.println("Got error " + responseCode);
-            }
-        } catch (IOException e) {
-            System.out.println("I/O Exception occurred.");
-        }
-        return null;
-    }
-
-    public void updateWithFormData(long id, String name, PetStatus status) {
-        int responseCode = 0;
-        try {
-            HttpEntity multipartEntity = org.apache.http.entity.mime.MultipartEntityBuilder.create()
-                    .addPart("name", new StringBody(name, ContentType.TEXT_PLAIN))
-                    .addPart("status", new StringBody(status.toString(), ContentType.TEXT_PLAIN))
-                    .build();
-
-            URL url = new URL(getBaseUrl() + id);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("POST");
-            connection.setDoOutput(true);
-            connection.setRequestProperty("Content-Type", "multipart/form-data");
-            OutputStream os = connection.getOutputStream();
-            multipartEntity.writeTo(os);
-            os.flush();
-            os.close();
-            responseCode = connection.getResponseCode();
-            System.out.println("Response code: " + responseCode);
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                System.out.println("Response:");
-                String response = this.getResponse(connection);
-                System.out.println(response);
-            } else {
-                System.out.println("Got error " + responseCode);
-            }
-        } catch (IOException e) {
-            System.out.println("I/O Exception occurred.");
-            return;
-        }
-    }
-
-    public void delete(long id) {
-        String urlStr = getBaseUrl() + id;
-        try {
-            URL url = new URL(urlStr);
-            HttpURLConnection connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("DELETE");
-            int responseCode = connection.getResponseCode();
-            System.out.println("Response code: " + responseCode);
-            if (responseCode == HttpURLConnection.HTTP_OK) {
-                System.out.println("Response:");
-                String response = this.getResponse(connection);
-                System.out.println(response);
-            } else {
-                System.out.println("Got error " + responseCode);
-            }
-        } catch (IOException e) {
-            System.out.println("I/O Exception occurred.");
-        }
     }
 }
